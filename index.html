@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Cubes - Three.js Scene</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            display: block;
+        }
+        .instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+        }
+        .mode-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 5px;
+        }
+        .mode-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid #555;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #888;
+        }
+        .mode-btn.active {
+            background: #4CAF50;
+            border-color: #4CAF50;
+            color: white;
+        }
+        .toolbar {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+        }
+        .point-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .tree-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .file-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .object-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .point-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid #555;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        .point-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #888;
+        }
+        .point-btn.active {
+            color: white;
+        }
+        .point-btn.start-point.active {
+            background: #FF5722;
+            border-color: #FF5722;
+        }
+        .point-btn.end-point.active {
+            background: #2196F3;
+            border-color: #2196F3;
+        }
+        .tree-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid #555;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        .tree-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #888;
+        }
+        .tree-btn.generate {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        .tree-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .sidebar {
+            position: absolute;
+            left: 10px;
+            top: 180px;
+            width: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #555;
+            border-radius: 5px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .sidebar-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-bottom: 1px solid #555;
+            font-weight: bold;
+        }
+        .object-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .object-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+        .object-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .object-item.selected {
+            background: #4CAF50;
+        }
+        .object-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            background: currentColor;
+            mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l9 4.5v11L12 22l-9-4.5v-11L12 2z"/></svg>');
+            -webkit-mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l9 4.5v11L12 22l-9-4.5v-11L12 2z"/></svg>');
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <strong>Professional Cura-Style Tree Support System:</strong><br>
+        • Central 3cm column generates organic tree supports<br>
+        • Layer-by-layer growth with organic curves (like Cura)<br>
+        • Tapered branches: 8mm base → 1.6mm tips<br>
+        • Smart detection: floating objects + edge overhangs<br>
+        • Gradient coloring: dark green base → light green tips<br>
+        • "Float Test Object" to test floating object supports<br>
+        • "Generate Tree" for professional tree support structure<br>
+        • Import STL files (auto-oriented for optimal printing)<br>
+        • Authentic Cura algorithm with organic movement<br>
+        • Select objects to move/rotate/scale, then regenerate<br>
+        • Right-click + drag to orbit view
+    </div>
+    
+    <div class="toolbar">
+        <div class="point-controls">
+            <button id="startPointBtn" class="point-btn start-point">Start Point</button>
+            <button id="endPointBtn" class="point-btn end-point">End Point</button>
+            <button id="noPointBtn" class="point-btn active">No Points</button>
+        </div>
+        <div class="file-controls">
+            <input type="file" id="fileInput" accept=".stl,.step,.stp" style="display: none;">
+            <button id="importBtn" class="tree-btn">Import STL/STEP</button>
+            <button id="deleteBtn" class="tree-btn">Delete Selected</button>
+        </div>
+        <div class="object-controls">
+            <button id="autoOrientBtn" class="tree-btn">Auto Orient</button>
+            <button id="cloneBtn" class="tree-btn">Clone Selected</button>
+            <button id="arrangeBtn" class="tree-btn">Arrange All</button>
+            <button id="floatTestBtn" class="tree-btn">Float Test Object</button>
+        </div>
+        <div class="tree-controls">
+            <button id="generateTreeBtn" class="tree-btn generate">Generate Tree</button>
+            <button id="clearTreeBtn" class="tree-btn">Clear Trees</button>
+            <button id="resetBtn" class="tree-btn">Reset All</button>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <div class="sidebar-header">Scene Objects</div>
+        <div class="object-list" id="objectList">
+            <!-- Objects will be populated here -->
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
